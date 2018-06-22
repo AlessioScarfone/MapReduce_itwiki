@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="WordCount" default="all" basedir=".">
+	<property name="build" value="bin" />
+	<property name="projectName" value="${ant.project.name}" />
+	<property name ="className" value="CountReference"/>
+
+	<target name="all" depends="check, deldir,jar,ex"/>
+
+	<target name="check">
+		<condition property="deldir">
+			<available file="result\${className}_o" type="dir"/>
+		</condition>
+	</target>
+
+	<target name="deldir" depends="check" if="deldir">
+		<delete dir="result\${className}_o"/>
+	</target>
+
+	<target name="jar">
+		<jar destfile="${className}.jar">
+			<fileset dir="${basedir}\bin" />
+		</jar>
+	</target>
+
+	<target depends="check, deldir, jar" name="ex">
+		<exec executable="cmd" dir="${basedir}">
+			<arg value="/C"/>
+			<arg value="hadoop jar ${className}.jar mr.${className} result/i result/${className}_o" />
+		</exec>
+	</target>
+
+</project>
