@@ -135,6 +135,7 @@ public class CountReference {
 		conf.set("xmlinput.start", "<page>");
 		conf.set("xmlinput.end", "</page>");
 		Job job = Job.getInstance(conf, "Count Reference");
+		job.setJarByClass(CountReference.class);
 
 		job.setOutputKeyClass(PageKey.class);
 		job.setOutputValueClass(IntWritable.class);
