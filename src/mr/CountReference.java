@@ -283,6 +283,12 @@ public class CountReference {
 	}
 
 	public static class Reducer2 extends Reducer<Text, IntWritable, NullWritable, Text> {
+		
+		@Override
+		protected void setup(Reducer<Text, IntWritable, NullWritable, Text>.Context context)
+				throws IOException, InterruptedException {
+			context.write(NullWritable.get(), new Text("page_title,count"));
+		}
 
 		@Override
 		protected void reduce(Text key, Iterable<IntWritable> values, Context context)
