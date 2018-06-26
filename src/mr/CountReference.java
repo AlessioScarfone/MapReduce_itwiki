@@ -13,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
@@ -102,7 +103,7 @@ public class CountReference {
 
 	}
 
-	public static class Reducer2 extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class Reducer2 extends Reducer<Text, IntWritable, NullWritable, Text> {
 
 		@Override
 		protected void reduce(Text key, Iterable<IntWritable> values, Context context)
@@ -111,7 +112,7 @@ public class CountReference {
 			for (IntWritable i : values) {
 				sum += i.get();
 			}
-			context.write(new Text(key), new IntWritable(sum));
+			context.write(NullWritable.get(), new Text(key.toString()+","+sum));
 		}
 	}
 
@@ -155,14 +156,8 @@ public class CountReference {
 		
 		 job2.setReducerClass(Reducer2.class);
 		
-		 // job2.setMapOutputKeyClass(IntWritable.class);
-		 // job2.setMapOutputValueClass(Text.class);
-		
 		 job2.setOutputKeyClass(Text.class);
 		 job2.setOutputValueClass(IntWritable.class);
-		
-		// job2.setInputFormatClass(TextInputFormat.class);
-		// job2.setOutputFormatClass(TextOutputFormat.class);
 		
 		 FileInputFormat.addInputPath(job2, new Path(args[1]));
 		 FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/1"));
