@@ -25,7 +25,7 @@
 	<target depends="check, deldir, jar" name="ex">
 		<exec executable="cmd" dir="${basedir}">
 			<arg value="/C"/>
-			<arg value="hadoop jar ${className}.jar mr.${className} result/i result/${className}_o" />
+			<arg value="hadoop jar ${className}.jar mr.${className} result/i result/${className}_o -Dfile.encoding=UTF-8" />
 		</exec>
 	</target>
 
