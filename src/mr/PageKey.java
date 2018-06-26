@@ -36,7 +36,7 @@ public class PageKey implements WritableComparable<PageKey> {
 	public int compareTo(PageKey o) {
 		int cmp = pageTo.compareTo(o.pageTo);
 		if(cmp == 0) 
-			cmp = pageFrom.compareTo(pageFrom);
+			cmp = pageFrom.compareTo(o.pageFrom);
 		return cmp;
 	}
 
