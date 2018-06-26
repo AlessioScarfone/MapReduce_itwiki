@@ -59,7 +59,7 @@ public class CountReference {
 				reader.close();
 				if (!recordKey.equals("") && !recordValue.equals(""))
 					parseText(recordKey, recordValue, context);
-			
+
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
@@ -72,7 +72,8 @@ public class CountReference {
 				if (reference.contains("|")) {
 					reference = reference.split("\\|")[0];
 				}
-				if(reference.contains("File:") || reference.contains("Categoria:") || reference.contains("Aiuto:") || reference.contains("s:"))
+				if (reference.contains("File:") || reference.contains("Categoria:") || reference.contains("Aiuto:")
+						|| reference.contains("s:"))
 					continue;
 				reference = reference.replaceAll("\\(|\\)|,|;|:", "");
 				PageKey pk = new PageKey(reference.trim(), title.toString().trim());
@@ -91,7 +92,31 @@ public class CountReference {
 	}
 	
 	
-	
+	public static class Mapper2 extends Mapper<LongWritable, Text, Text, IntWritable> {
+
+		@Override
+		protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+				throws IOException, InterruptedException {
+			String[] tok = value.toString().split("\t");
+			context.write(new Text(tok[0]), new IntWritable(Integer.parseInt(tok[1])));
+		}
+
+		
+	}
+
+	public static class Reducer2 extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+		@Override
+		protected void reduce(Text key, Iterable<IntWritable> values, Context context)
+				throws IOException, InterruptedException {
+			int sum = 0;
+			for (IntWritable i : values) {
+				sum += i.get();
+			}
+			context.write(new Text(key), new IntWritable(sum));
+		}
+	}
+
 	public static class PageKeyGroupComparator extends WritableComparator {
 
 		protected PageKeyGroupComparator() {
@@ -111,17 +136,45 @@ public class CountReference {
 		conf.set("xmlinput.start", "<page>");
 		conf.set("xmlinput.end", "</page>");
 		Job job = Job.getInstance(conf, "Count Reference");
-		
+
 		job.setOutputKeyClass(PageKey.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setMapperClass(Mapper1.class);
-//		job.setGroupingComparatorClass(PageKeyGroupComparator.class);
+		// job.setGroupingComparatorClass(PageKeyGroupComparator.class);
 		job.setReducerClass(Reducer1.class);
 
 		job.setInputFormatClass(XmlInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+		boolean success = job.waitForCompletion(true);
+
+		if (success) {
+			Job job2 = Job.getInstance(conf, "Job2");
+
+			job2.setMapperClass(Mapper2.class);
+
+			job2.setReducerClass(Reducer2.class);
+
+			// job2.setMapOutputKeyClass(IntWritable.class);
+			// job2.setMapOutputValueClass(Text.class);
+
+			job2.setOutputKeyClass(Text.class);
+			job2.setOutputValueClass(Text.class);
+			
+//			job2.setInputFormatClass(TextInputFormat.class);
+//			job2.setOutputFormatClass(TextOutputFormat.class);
+
+			FileInputFormat.addInputPath(job2, new Path(args[1]));
+			FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/1"));
+
+			success = job2.waitForCompletion(true);
+		}
+
+		if (success)
+			System.exit(0);
+		else
+			System.exit(1);
 	}
 }
