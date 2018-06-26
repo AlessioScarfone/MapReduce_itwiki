@@ -87,11 +87,10 @@ public class CountReference {
 		@Override
 		protected void reduce(PageKey key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			context.write(new Text(key.pageTo), one);
+			context.write(new Text(key.pageTo /*+ "|" + key.pageFrom*/), one);
 		}
 	}
-	
-	
+
 	public static class Mapper2 extends Mapper<LongWritable, Text, Text, IntWritable> {
 
 		@Override
@@ -101,7 +100,6 @@ public class CountReference {
 			context.write(new Text(tok[0]), new IntWritable(Integer.parseInt(tok[1])));
 		}
 
-		
 	}
 
 	public static class Reducer2 extends Reducer<Text, IntWritable, Text, IntWritable> {
@@ -140,7 +138,7 @@ public class CountReference {
 		job.setOutputKeyClass(PageKey.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setMapperClass(Mapper1.class);
-		// job.setGroupingComparatorClass(PageKeyGroupComparator.class);
+		job.setGroupingComparatorClass(PageKeyGroupComparator.class);
 		job.setReducerClass(Reducer1.class);
 
 		job.setInputFormatClass(XmlInputFormat.class);
@@ -150,27 +148,27 @@ public class CountReference {
 
 		boolean success = job.waitForCompletion(true);
 
-		if (success) {
-			Job job2 = Job.getInstance(conf, "Job2");
-
-			job2.setMapperClass(Mapper2.class);
-
-			job2.setReducerClass(Reducer2.class);
-
-			// job2.setMapOutputKeyClass(IntWritable.class);
-			// job2.setMapOutputValueClass(Text.class);
-
-			job2.setOutputKeyClass(Text.class);
-			job2.setOutputValueClass(Text.class);
-			
-//			job2.setInputFormatClass(TextInputFormat.class);
-//			job2.setOutputFormatClass(TextOutputFormat.class);
-
-			FileInputFormat.addInputPath(job2, new Path(args[1]));
-			FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/1"));
-
-			success = job2.waitForCompletion(true);
-		}
+		 if (success) {
+		 Job job2 = Job.getInstance(conf, "Job2");
+		
+		 job2.setMapperClass(Mapper2.class);
+		
+		 job2.setReducerClass(Reducer2.class);
+		
+		 // job2.setMapOutputKeyClass(IntWritable.class);
+		 // job2.setMapOutputValueClass(Text.class);
+		
+		 job2.setOutputKeyClass(Text.class);
+		 job2.setOutputValueClass(IntWritable.class);
+		
+		// job2.setInputFormatClass(TextInputFormat.class);
+		// job2.setOutputFormatClass(TextOutputFormat.class);
+		
+		 FileInputFormat.addInputPath(job2, new Path(args[1]));
+		 FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/1"));
+		
+		 success = job2.waitForCompletion(true);
+		 }
 
 		if (success)
 			System.exit(0);
