@@ -76,18 +76,17 @@ public class CountReference {
 		}
 
 	}
-	
+
 	/**
 	 * Adapted from Apache/Mahout XML Input Format
 	 * 
-	 * Project Repo:
-	 * https://github.com/apache/mahout
+	 * Project Repo: https://github.com/apache/mahout
 	 * 
 	 * XmlInputFormat:
 	 * https://github.com/apache/mahout/blob/574ccc990673afdd34cb47f2b50f4379c5823212/integration/src/main/java/org/apache/mahout/text/wikipedia/XmlInputFormat.java
 	 * 
-	 * Changes applied:
-	 * - remove dependency to "com.google.common.io.Closeables" and "org.apache.commons.io.Charsets"
+	 * Changes applied: - remove dependency to "com.google.common.io.Closeables" and
+	 * "org.apache.commons.io.Charsets"
 	 */
 	public static class XmlInputFormat extends TextInputFormat {
 		public static final String START_TAG_KEY = "xmlinput.start";
@@ -244,7 +243,7 @@ public class CountReference {
 		private void parseText(String title, String text, Context context) throws IOException, InterruptedException {
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				String reference = matcher.group(1);
+				String reference = matcher.group(0);
 				if (reference != null && !reference.equals("")) {
 					if (reference.contains("|") && !(reference.startsWith("|") && !reference.startsWith(" |"))) {
 						reference = reference.split("\\|")[0];
@@ -255,9 +254,11 @@ public class CountReference {
 				} else {
 					continue;
 				}
-				reference = reference.replaceAll("\\(|\\)|,|;|:|\"", "");
-				PageKey pk = new PageKey(reference.trim(), title.toString().trim());
-				context.write(pk, one);
+				reference = reference.replaceAll("\\[|\\]", "").trim();
+				if (reference.equals("") == false) {
+					PageKey pk = new PageKey(reference, title.toString().trim());
+					context.write(pk, one);
+				}
 			}
 		}
 	}
@@ -283,7 +284,7 @@ public class CountReference {
 	}
 
 	public static class Reducer2 extends Reducer<Text, IntWritable, NullWritable, Text> {
-		
+
 		@Override
 		protected void setup(Reducer<Text, IntWritable, NullWritable, Text>.Context context)
 				throws IOException, InterruptedException {
