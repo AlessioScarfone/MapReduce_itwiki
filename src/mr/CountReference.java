@@ -254,7 +254,7 @@ public class CountReference {
 				} else {
 					continue;
 				}
-				reference = reference.replaceAll("\\[|\\]", "").trim();
+				reference = reference.replaceAll("\\[|\\]|\\,", "").trim();
 				if (reference.equals("") == false) {
 					PageKey pk = new PageKey(reference, title.toString().trim());
 					context.write(pk, one);
