@@ -3,7 +3,10 @@ package mr;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -352,9 +355,23 @@ public class CountReference {
 			success = job2.waitForCompletion(true);
 		}
 
-		if (success)
+		if (success) {
+			createCSV(args[1]);
 			System.exit(0);
-		else
+		} else
 			System.exit(1);
+	}
+
+	private static void createCSV(String basePath) {
+		File source = new File(basePath+"/1/part-r-00000");
+		File dest = new File("result/incomingReferencesCount.csv");
+
+		try {
+			Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 }
