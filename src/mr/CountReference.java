@@ -251,8 +251,8 @@ public class CountReference {
 					if (reference.contains("|") && !(reference.startsWith("|") && !reference.startsWith(" |"))) {
 						reference = reference.split("\\|")[0];
 					}
-					if (reference.contains("File:") || reference.contains("Categoria:") || reference.contains("Aiuto:")
-							|| reference.contains("s:"))
+					if (reference.contains("File:") || reference.contains("Categoria:") || reference.contains("Category:") || reference.contains("Aiuto:")
+							|| reference.contains("s:") || reference.contains("Image:") || reference.contains("Immagine:"))
 						continue;
 				} else {
 					continue;
